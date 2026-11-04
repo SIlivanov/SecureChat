@@ -55,7 +55,8 @@ inline std::vector<uint8_t> encrypt(const std::string& plaintext, const std::vec
 
     // Шифруем основную часть
     if (EVP_EncryptUpdate(ctx.get(), result.data() + AES_IV_SIZE, &len,
-                          reinterpret_cast<const uint8_t*>(plaintext.data()), plaintext.size()) != 1) {
+                          reinterpret_cast<const uint8_t*>(plaintext.data()),
+                          static_cast<int>(plaintext.size())) != 1) {
         throw std::runtime_error("EVP_EncryptUpdate failed");
     }
     ciphertext_len = len;
@@ -79,7 +80,7 @@ inline std::string decrypt(const std::vector<uint8_t>& packet, const std::vector
     // Извлекаем IV из первых 16 байт пакета
     const uint8_t* iv = packet.data();
     const uint8_t* ciphertext = packet.data() + AES_IV_SIZE;
-    int ciphertext_len = packet.size() - AES_IV_SIZE;
+    int ciphertext_len = static_cast<int>(packet.size() - AES_IV_SIZE);
 
     CipherCtxPtr ctx(EVP_CIPHER_CTX_new());
     if (!ctx) throw std::runtime_error("Failed to create EVP_CIPHER_CTX");
