@@ -6,6 +6,7 @@
 #include <cstring>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#include <openssl/crypto.h>
 
 namespace crypto {
 
@@ -102,8 +103,10 @@ inline std::string decrypt(const std::vector<uint8_t>& packet, const std::vector
         throw std::runtime_error("Decryption failed (wrong key or corrupted packet)");
     }
     plaintext_len += len;
-
-    return std::string(reinterpret_cast<char*>(plaintext.data()), plaintext_len);
+    std::string result(reinterpret_cast<char*>(plaintext.data()), plaintext_len);
+    // Затираем текст в памяти
+    OPENSSL_cleanse(plaintext.data(), plaintext.size());
+    return result;
 }
 
 } // namespace crypto
