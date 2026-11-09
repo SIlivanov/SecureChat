@@ -152,6 +152,13 @@ int main(int argc, char* argv[]) {
         tcp::endpoint endpoint(tcp::v4(), port);
         ChatServer server(io_context, endpoint);
 
+        // Перехватываем ctrl + c
+        boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
+        signals.async_wait([&io_context](const boost::system::error_code&, int signal_number) {
+            std::cout << "\n[Server] Received signal " << signal_number << ". Stopping gracefully...\n";
+            io_context.stop();
+        });
+
         std::cout << "[Server] Secure Chat Server started on port " << port << "...\n";
         io_context.run();
     } catch (std::exception& e) {
